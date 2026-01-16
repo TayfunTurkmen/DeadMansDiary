@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  password    String
+  isAdmin     Boolean   @default(false)
+  lastCheckin DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Tab {
+  id        Int      @id @default(autoincrement())
+  name      String
+  position  Int
+  pages     Page[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+}
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  tabId     Int
+  name      String
+  position  Int
+  tab       Tab      @relation(fields: [tabId], references: [id], onDelete: Cascade)
+  entries   Entry[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tabId, position])
+}
+
+model Entry {
+  id        Int      @id @default(autoincrement())
+  pageId    Int
+  title     String
+  content   String
+  isPublic  Boolean  @default(false)
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageId])
+  @@index([isPublic])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
